@@ -1,0 +1,424 @@
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Importing necessary packages...
+import math as m
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.ticker import FormatStrFormatter
+import matplotlib.collections as clt
+from copy import deepcopy
+import re
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+#CODE THAT WOULD'VE BEEN RELEVANT FOR THE GALACTIC MERGER SIMULATION...
+'''
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#Introducing the galactic merger simulation...
+print("Hello! Welcome to the Galactic Merger Simulator (by Alex Savino hahah)!")
+
+print("""\n   This simulation includes two objects - a host galaxy and a satellite
+galaxy. A satellite galaxy can be thought of as a smaller associate galaxy who travels
+on bound orbits around a more massive and generally luminous host galaxy, (which some
+may also refer to as a 'primary galaxy'), due to its colossal gravitational potential.
+In this simulation, the host galaxy, whose center will be initially stationed at the
+center of your screen, will be roughly 10 times the size of the satellite galaxy although
+this of course is subject to change as you will be able to choose the initial diameter
+of both the host and satellite galaxy within reasonable ranges, (ranges which I determined
+by considering our Milky Way galaxy as a sort of standard host galaxy size). Upon watching
+the merger of your galaxies, you will be able to observe a couple-billion-year process
+take place in seconds!! You'll be able to observe first-hand the famous, amazing phenomenon
+of'tidal stripping,' and the associated 'tidal tails' of each of the galaxies during
+such a process.
+      """)
+
+#Allowing the user to choose if they'd like a brief overview of tidal stripping...
+while True:
+  information_request = input("\nWould you like to learn a little bit about tidal stripping?: ")
+  stripped_input = information_request.strip(" ,'")
+  split_input = re.split('[ ,.]',stripped_input)
+  if (len(split_input)==1):
+    if (stripped_input.upper()=="YES"):
+      print("\nSounds good!")
+      print("""\n   Tidal stripping occurs when a large host galaxy pulls stars, gas,
+      and other stellar material from a smaller galaxy that rotates around it due to
+      its own overwhelming gravitational potential. Host galaxies are able to do this
+      because the force of attraction between a host galaxy and a satellite galaxy varies
+      across the satellite's body, material closer to the host galaxy experiencing a
+      greater force of attraction than that farther away. 'Tidal tails' as you will
+      observe during your simulation runs, are the result of such gravitational interactions
+      between a host and satellite galaxy. They are majestic, thin and elongated regions
+      of stars and interstellar gas that extend into space from the outer regions of both
+      host and satellite -type galaxies. A given galaxy in the process of getting torn
+      apart due to the gravity of another massive system tends to form two tidal tails -
+      one preceding and one trailing such a galaxy. Even following the completion of a
+      galactic merger, tidal tails can persist in a merged system for a very long time and
+      thus can be considered a signature of recent merger activity.
+      """)
+      print("Now for the fun stuff!...")
+      break
+    elif (stripped_input.upper()=="NO"):
+      print("\nNo worries! Let's go right to the fun stuff...")
+      break
+    else:
+        print("Sorry! Please input 'Yes' or 'No'...")
+        continue
+'''
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#Safeguarded user input questions...
+'''
+#1: Host galaxy diameter...
+while True:
+  h_diameter = input("\nEnter a DIAMETER for your HOST GALAXY between 5000.0pc and 50000.0pc?: ")
+  stripped_input = h_diameter.strip(" ,'pc")
+  split_input = re.split('[ ,]',stripped_input)
+  if (len(split_input)==1):
+    try:
+      value = float(stripped_input)
+      if (value>=5000.0 and value<=50000.0):
+        break
+      else:
+        print("Sorry! It looks like your request is out of range...")
+    except ValueError:
+      print("Sorry! It looks like you entered a word... \nPlease print a single number below... ")
+  else:
+    print("Sorry! It looks like you entered more than one word... \nPlease print a single number below... ")
+h_diameter = float(stripped_input)
+
+
+#2: Satellite galaxy size...
+while True:
+  s_diameter = input("\nEnter a DIAMETER for your SATELLITE GALAXY between 30.0pc and 15000.0pc \n"
+  "   (less than that of your host galaxy)?: ")
+  stripped_input = s_diameter.strip(" ,'pc")
+  split_input = re.split('[ ,]',stripped_input)
+  if (len(split_input)==1):
+    try:
+      value = float(stripped_input)
+      if (value>=30.0 and value<=30000.0) and (value<h_diameter):
+        break
+      elif (value>=30.0 and value<=30000.0) and (value>=h_diameter):
+        print("Sorry! It looks like your request is equal to or greater than that of your host galaxy...")
+      else:
+        print("Sorry! It looks like your request is out of range...")
+    except ValueError:
+      print("Sorry! It looks like you entered a word... \nPlease print a single number below... ")
+  else:
+    print("Sorry! It looks like you entered more than one word... \nPlease print a single number below... ")
+s_diameter = float(stripped_input)
+
+
+#3: Satellite distance...
+lower_bound = float(f'{(h_diameter/2 + s_diameter/2):.1f}')*1000
+upper_bound = float(f'{(lower_bound + s_diameter*1000/2):.1f}')
+
+while True:
+  satellite_r = input("\nHow far would you like the center of your satellite galaxy to be from the \n"
+  "   center of your host galaxy (between " + str(lower_bound) + "pc and " + str(upper_bound) + "pc)?: ")
+  stripped_input = satellite_r.strip(" ,'pc")
+  split_input = re.split('[ ,]',stripped_input)
+  if (len(split_input)==1):
+    try:
+      value = float(stripped_input)
+      if (value>=lower_bound) and (value<=upper_bound):
+        break
+      else:
+        print("Sorry! It looks like your request is out of range...")
+    except ValueError:
+      print("Sorry! It looks like you entered a word... \nPlease print a single number below... ")
+  else:
+    print("Sorry! It looks like you entered more than one word... \nPlease print a single number below... ")
+satellite_r = float(stripped_input)
+
+s_center = ((satellite_r)**(1/2),(satellite_r)**(1/2))
+'''
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# #~~~~DESIGNING AN N-BODY SIMULATOR!! DESIGNING AN N-BODY SIMULATOR!!~~~~~
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#Introducing the galactic merger simulation...
+print("Hello! Welcome to the N-Body Simulator (by Alex Savino)!")
+
+print("""\n   This simulation includes two massive objects, each with a
+mass of 1.591x10^66[kg] and velocities of magnitudes of 100[pc/s] directed in
+opposite directions perpendicular to the line connecting them. The reason that
+the mass of these two objects is so large is because you, the user, can position
+them however you like on a (200pc x 200pc) grid of flat spacetime - a huge
+amount of space! (A lightyear [ly] is roughly a third of a parsec [pc]!) Although
+it might be weird and unfamiliar at first, this educational tool is a good way
+to work towards developing a strong intuition about how the distance between
+two massive objects might influence the force of attraction experienced by
+each due to the prescence of the other, particularly on astronomical scales.
+      """)
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#Safeguarded user input questions...
+#1: Mass 1 X-axis Location...
+while True:
+  mass_1_loc_x = input("\nEnter a POSITION alonng the X-AXIS for your FIRST MASS to begin between -100.0pc and 100.0pc?: ")
+  stripped_input = mass_1_loc_x.strip(" ,'pc")
+  split_input = re.split('[ ,]',stripped_input)
+  if (len(split_input)==1):
+    try:
+      value = float(stripped_input)
+      if (value>=-100 and value<=100.0):
+        break
+      else:
+        print("Sorry! It looks like your request is out of range...")
+    except ValueError:
+      print("Sorry! It looks like you entered a word... \nPlease print a single number below... ")
+  else:
+    print("Sorry! It looks like you entered more than one word... \nPlease print a single number below... ")
+mass_1_loc_x = float(stripped_input)
+
+#2: Mass 1 Y-axis Location...
+while True:
+  mass_1_loc_y = input("\nEnter a POSITION alonng the Y-AXIS for your FIRST MASS to begin between -100.0pc and 100.0pc?: ")
+  stripped_input = mass_1_loc_y.strip(" ,'pc")
+  split_input = re.split('[ ,]',stripped_input)
+  if (len(split_input)==1):
+    try:
+      value = float(stripped_input)
+      if (value>=-100 and value<=100.0):
+        break
+      else:
+        print("Sorry! It looks like your request is out of range...")
+    except ValueError:
+      print("Sorry! It looks like you entered a word... \nPlease print a single number below... ")
+  else:
+    print("Sorry! It looks like you entered more than one word... \nPlease print a single number below... ")
+mass_1_loc_y = float(stripped_input)
+
+#3: Mass 2 X-axis Location...
+while True:
+  mass_2_loc_x = input("\nEnter a POSITION along the X-AXIS for your SECOND MASS to begin between -100.0pc and 100.0pc?: ")
+  stripped_input = mass_2_loc_x.strip(" ,'pc")
+  split_input = re.split('[ ,]',stripped_input)
+  if (len(split_input)==1):
+    try:
+      value = float(stripped_input)
+      if (value>=-100 and value<=100.0):
+        break
+      else:
+        print("Sorry! It looks like your request is out of range...")
+    except ValueError:
+      print("Sorry! It looks like you entered a word... \nPlease print a single number below... ")
+  else:
+    print("Sorry! It looks like you entered more than one word... \nPlease print a single number below... ")
+mass_2_loc_x = float(stripped_input)
+
+#4: Mass 2 Y-axis Location...
+while True:
+  mass_2_loc_y = input("\nEnter a POSITION along the Y-AXIS for your SECOND MASS to begin between -100.0pc and 100.0pc?: ")
+  stripped_input = mass_2_loc_y.strip(" ,'pc")
+  split_input = re.split('[ ,]',stripped_input)
+  if (len(split_input)==1):
+    try:
+      value = float(stripped_input)
+      if (value>=-100 and value<=100.0):
+        break
+      else:
+        print("Sorry! It looks like your request is out of range...")
+    except ValueError:
+      print("Sorry! It looks like you entered a word... \nPlease print a single number below... ")
+  else:
+    print("Sorry! It looks like you entered more than one word... \nPlease print a single number below... ")
+mass_2_loc_y = float(stripped_input)
+
+#5: Allowing the user to name their simulation...
+username = input("\nPlease enter your name for it to appear on top of your simulation: ")
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+# Arbitrary, exemplar mass-set-up to demonstrate the validilty of my N-body simulator...
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+N = 2 #number of bodies in the simulator...
+softening = 0.1 #(arbitrary constant to make particle interactions more realistic)#(arbitrary constant to make particle interactions more realistic)
+G = 2.2717163e-60 #[pc3/kg-1/s-2] 
+
+'''
+mass_1_loc_x = -50.0
+mass_1_loc_y = 0.0
+mass_2_loc_x = 50.0
+mass_2_loc_y = 0.0
+'''
+
+mass_array = 1.591*10**66 * np.ones((N,1))  #[kg]
+position_array = np.array([[mass_1_loc_x,mass_1_loc_y],  #[pc]
+                           [mass_2_loc_x,mass_2_loc_y]])
+
+# Calculating initial velocites for the velocity array...
+r_1 = (mass_1_loc_x**2+mass_1_loc_y**2)**(1/2)
+r_2 = (mass_2_loc_x**2+mass_2_loc_y**2)**(1/2)
+d = ((mass_2_loc_x-mass_1_loc_x)**(1/2)+(mass_2_loc_y-mass_1_loc_y)**(1/2))**(1/2)
+θ = abs(m.atan(abs((mass_1_loc_y-mass_2_loc_y)/(mass_1_loc_x-mass_2_loc_x))))
+
+vel_1_x = 100 * abs(m.sin(θ))  #[pc/s]
+vel_1_y = 100 * abs(m.cos(θ))  #[pc/s]
+
+
+if (mass_1_loc_x>=mass_2_loc_x) and (mass_1_loc_y>=mass_2_loc_y):
+    vel_1_y = -vel_1_y
+if (mass_1_loc_x<=mass_2_loc_x) and (mass_1_loc_y<=mass_2_loc_y):
+    vel_1_x = -vel_1_x
+if (mass_1_loc_x>=mass_2_loc_x) and (mass_1_loc_y<=mass_2_loc_y):
+    vel_1_x = -vel_1_x
+    vel_1_y = -vel_1_y
+if (mass_1_loc_x>=mass_2_loc_x) and (mass_1_loc_y==mass_2_loc_y):
+    vel_1_y = -vel_1_y
+if (mass_1_loc_x==mass_2_loc_x) and (mass_1_loc_y<=mass_2_loc_y):
+    vel_1_x = -vel_1_x
+    
+vel_2_x = -vel_1_x
+vel_2_y = -vel_1_y
+
+test_array = np.array([[vel_1_x,vel_1_y],
+                          [vel_2_x,vel_2_y]])
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+# The actual N-body simulator*...
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def get_acceleration(position_matrix,mass_matrix):
+    
+    global G,softening
+    x = position_matrix[:,0:1]
+    y = position_matrix[:,1:2]
+    dx = x.T - x     
+    dy = y.T - y
+    #dz = z.T - z
+
+    inv_r3 = (dx**2 + dy**2 + softening**2)
+    inv_r3[inv_r3>0] = inv_r3[inv_r3>0]**(-1.5)
+    a_x = G * (dx * inv_r3) @ mass_matrix
+    a_y = G * (dy * inv_r3) @ mass_matrix
+
+    acceleration_matrix = np.hstack((a_x,a_y))
+    return acceleration_matrix
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+def main():
+    #Important constants/parameters & time initialization...
+    global position_array
+    
+    t = 0.00
+    dt = 0.01
+    tEnd = 100.00
+    Nt = int(np.ceil(tEnd/dt))
+    plotRealTime = True
+
+
+    #Initializing the VELOCITY MATRIX...
+    velocity_array = np.array([[vel_1_x,vel_1_y],
+                          [vel_2_x,vel_2_y]])
+    
+    velocity_array -= np.mean(mass_array * velocity_array,0) / np.mean(mass_array)
+	
+    #Initializing the ACCELERATION MATRIX...
+    acceleration_array = get_acceleration(position_array,mass_array)
+
+    #Initializing the figure itself...
+    fig = plt.figure(figsize=(7.50,7.50), facecolor='black', dpi=100)
+    fig = plt.gcf()
+    ax = plt.axes(xlim=(-100.0,100.0),ylim=(-100.0,100.0))
+    grid_1 = ax.grid(b=True,which='major',color='grey',linestyle='--',linewidth=0.25)
+    grid_2 = ax.grid(b=True,which='minor',color='grey',linestyle='--',linewidth=0.15)
+    ax.minorticks_on()
+    ax.set_facecolor('black')
+    ax.spines['top'].set_color('white')
+    ax.spines['bottom'].set_color('white')
+    ax.spines['left'].set_color('white')
+    ax.spines['right'].set_color('white')
+    plt.xticks(fontname='Silom',fontsize=10)
+    plt.yticks(fontname='Silom',fontsize=10)
+    ax.set_xlabel('(X) Position in Flat Space [pc]',fontname='Silom')
+    ax.set_ylabel('(Y) Position in Flat Space [pc]',fontname='Silom')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.tick_params(axis='x',color='white',labelcolor='white')
+    ax.tick_params(axis='y',color='white',labelcolor='white')
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    plt.title(username.upper() + "'s N-Body Simulation",color='white',fontsize=20,fontname='Silom')
+
+    #Updating the simulation...
+    for i in range(Nt):
+        velocity_array += acceleration_array * dt/2.0
+        position_array += velocity_array * dt
+        acceleration_array = get_acceleration(position_array,mass_array)	
+        velocity_array += acceleration_array * dt/2.0
+        t += dt
+
+        if plotRealTime or (i == Nt-1):
+            plt.sca(ax)
+            plt.cla()
+            grid_1 = ax.grid(b=True,which='major',color='grey',linestyle='--',linewidth=0.25)
+            grid_2 = ax.grid(b=True,which='minor',color='grey',linestyle='--',linewidth=0.15)
+            plt.scatter(position_array[:,0],position_array[:,1],s=10,color='blue')
+            ax.minorticks_on()
+            ax.set(xlim=(-100.0,100.0),ylim=(-100.0,100.0))
+            ax.set_facecolor('black')
+            ax.spines['top'].set_color('white')
+            ax.spines['bottom'].set_color('white')
+            ax.spines['left'].set_color('white')
+            ax.spines['right'].set_color('white')
+            plt.xticks(fontname='Silom',fontsize=7)
+            plt.yticks(fontname='Silom',fontsize=7)
+            ax.set_xlabel('(X) Position in Flat Space [pc]',fontname='Silom')
+            ax.set_ylabel('(Y) Position in Flat Space [pc]',fontname='Silom')
+            ax.xaxis.label.set_color('white')
+            ax.yaxis.label.set_color('white')
+            ax.tick_params(axis='x',color='white',labelcolor='white')
+            ax.tick_params(axis='y',color='white',labelcolor='white')
+            ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+            ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+            plt.title(username.upper() + "'s N-Body Simulation",color='white',fontsize=20,fontname='Silom')
+            plt.pause(0.001)
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      
+if __name__=="__main__":
+    main()
+
